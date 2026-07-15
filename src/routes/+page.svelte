@@ -738,7 +738,7 @@ $ print F(0) and F(1) $
 <div id="wrapper">
 	<div id="inner-wrapper">
 		<div id="header">
-			<div id="left"><img src={logoSmall} alt="Aglang" /><a href="/">Docs</a></div>
+			<div id="left"><img src={logoSmall} alt="Aglang" /><a href="https://github.com/0xF1dev/aglang/blob/main/docs/reference.md">Docs</a></div>
 			<div id="right">
 				<select name="Examples" id="" bind:value={example}>
 					<option value="default" disabled selected>Select an example</option>
