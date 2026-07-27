@@ -838,6 +838,32 @@ $ print F(0) and F(1) $
 						step();
 					}}>step</button
 				>
+				<table>
+					<tbody>
+						<tr>
+							<td>Register 0</td>
+							<td>{programState.r0}</td>
+						</tr>
+						<tr>
+							<td>Register 1</td>
+							<td>{programState.r1}</td>
+						</tr>
+						<tr>
+							<td>Stack</td>
+							<td>
+								<div id="stack-values">
+									{#each programState.stack as val}
+										<span>{val}</span>
+									{/each}
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>Instruction counter</td>
+							<td>{programState.instructionPointer}</td>
+						</tr>
+					</tbody>
+				</table>
 			</div>
 		</div>
 		<div id="io">
@@ -963,7 +989,7 @@ $ print F(0) and F(1) $
 				margin-bottom: 2rem;
 
 				#editor {
-					width: 50vw;
+					width: 40vw;
 					border: 1px solid #333;
 					border-radius: 4px;
 					font-family: monospace;
@@ -977,9 +1003,37 @@ $ print F(0) and F(1) $
 					display: flex;
 					flex-direction: column;
 					gap: 1rem;
+					flex-grow: 1;
 
-					&:disabled {
+					.action-btn:disabled {
 						background-color: #595959;
+					}
+
+					table {
+						border-collapse: collapse;
+
+						td {
+							border: 1px solid white;
+							padding: 4px;
+
+							&:first-child {
+								font-weight: 600;
+							}
+
+							&:nth-child(2) {
+								text-align: center;
+								min-width: 24px;
+							}
+
+							#stack-values {
+								display: flex;
+								flex-direction: column-reverse;
+
+								span:last-child {
+									font-weight: 600;
+								}
+							}
+						}
 					}
 				}
 			}
