@@ -809,6 +809,7 @@ $ print F(0) and F(1) $
 				<button
 					class="action-btn"
 					onclick={() => {
+						programState.executionDone = false;
 						programState.instructionPointer = 0;
 						programState.stopped = false;
 						output = '';
@@ -818,6 +819,7 @@ $ print F(0) and F(1) $
 				><button
 					class="action-btn"
 					onclick={() => {
+						programState.executionDone = false;
 						programState.instructionPointer = 0;
 						programState.stopped = true;
 						output = '';
