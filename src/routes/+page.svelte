@@ -111,7 +111,8 @@
 		r1: 0,
 		instructionPointer: 0,
 		loops: [] as number[],
-		stopped: true
+		stopped: true,
+		executionDone: false
 	});
 
 	let example = $state('default');
@@ -173,6 +174,10 @@ $ print F(0) and F(1) $
 	});
 	let output = $state('');
 	let input = $state('');
+
+	let isWaitingInput = $state(false);
+
+	let statements: Statement[] = $state([]);
 
 	let resumeInterpreter: ((arg0: string) => void) | null = null;
 
@@ -277,8 +282,6 @@ $ print F(0) and F(1) $
 	function parse() {
 		let statements: Statement[] = [];
 
-		console.log(code);
-
 		const commentRegex = /\$[\s\S]*?\$/g;
 		let cleanCode = code.replaceAll(commentRegex, '');
 
@@ -306,7 +309,6 @@ $ print F(0) and F(1) $
 		let statementObj: Statement = { type: null, arg0: null, arg1: null };
 
 		let rawArgs = statement.split(/[|>\!+\-*/%\[\]]/).filter((s) => s.length > 0);
-		console.log(rawArgs);
 
 		if (rawArgs.length > 2) {
 			error(
@@ -519,219 +521,251 @@ $ print F(0) and F(1) $
 		}
 	}
 
+	async function interpretStatement(statement: Statement) {
+		switch (statement.type) {
+			case StatementTypes.LoopStart:
+				if (!programState.loops.includes(programState.instructionPointer)) {
+					programState.loops.push(programState.instructionPointer);
+				}
+				break;
+
+			case StatementTypes.LoopEnd:
+				if (
+					programState.stack.length === 0 ||
+					programState.stack[programState.stack.length - 1] !== 0
+				) {
+					programState.instructionPointer = programState.loops[programState.loops.length - 1];
+				} else if (programState.stack[programState.stack.length - 1] === 0) {
+					programState.loops.pop();
+				}
+				break;
+
+			case StatementTypes.Copy:
+				const value = getArgumentValue(statement.arg0, programState.instructionPointer);
+				switch (statement.arg1?.type) {
+					case 'r0':
+						programState.r0 = value;
+						break;
+					case 'r1':
+						programState.r1 = value;
+						break;
+					case 'stack':
+						programState.stack.push(value);
+						break;
+					case 'stdout':
+						if (statement.arg1.type === 'stdout' && statement.arg1.asNumber === false) {
+							output += String.fromCharCode(value);
+						} else {
+							output += value.toString();
+						}
+						break;
+
+					default:
+						error(
+							new SyntaxError(SyntaxErrorType.InvalidDestination),
+							programState.instructionPointer,
+							`Cannot write to argument of type: ${statement.arg1?.type}`
+						);
+						break;
+				}
+				break;
+			case StatementTypes.Input:
+				isWaitingInput = true;
+				const i: string = await new Promise((resolve) => {
+					resumeInterpreter = resolve;
+				});
+				programState.stack.push(0);
+				const inputArray = i.split('').reverse();
+				inputArray.forEach((v) => {
+					programState.stack.push(v.charCodeAt(0));
+				});
+				isWaitingInput = false;
+				break;
+			case StatementTypes.Remove:
+				switch (statement.arg0?.type) {
+					case 'r0':
+						programState.r0 = 0;
+						break;
+					case 'r1':
+						programState.r1 = 0;
+						break;
+					case 'stack':
+						programState.stack.pop();
+						break;
+
+					default:
+						error(
+							new SyntaxError(SyntaxErrorType.InvalidDestination),
+							programState.instructionPointer,
+							`Cannot write to argument of type: ${statement.arg0?.type}`
+						);
+						break;
+				}
+				break;
+			case StatementTypes.Add:
+				const valueToAdd = getArgumentValue(statement.arg1, programState.instructionPointer);
+				switch (statement.arg0?.type) {
+					case 'r0':
+						programState.r0 += valueToAdd;
+						if (programState.r0 > 255) {
+							programState.r0 %= 256;
+						}
+						break;
+					case 'r1':
+						programState.r1 += valueToAdd;
+						if (programState.r1 > 255) {
+							programState.r1 %= 256;
+						}
+						break;
+
+					default:
+						error(
+							new SyntaxError(SyntaxErrorType.InvalidDestination),
+							programState.instructionPointer,
+							`Cannot write to argument of type: ${statement.arg0?.type}`
+						);
+						break;
+				}
+				break;
+			case StatementTypes.Subtract:
+				const valueToSub = getArgumentValue(statement.arg1, programState.instructionPointer);
+				switch (statement.arg0?.type) {
+					case 'r0':
+						programState.r0 -= valueToSub;
+						if (programState.r0 < 0) {
+							programState.r0 += 256;
+						}
+						break;
+					case 'r1':
+						programState.r1 -= valueToSub;
+						if (programState.r1 < 0) {
+							programState.r1 += 256;
+						}
+						break;
+
+					default:
+						error(
+							new SyntaxError(SyntaxErrorType.InvalidDestination),
+							programState.instructionPointer,
+							`Cannot write to argument of type: ${statement.arg0?.type}`
+						);
+						break;
+				}
+				break;
+			case StatementTypes.Multiply:
+				const valueToMul = getArgumentValue(statement.arg1, programState.instructionPointer);
+				switch (statement.arg0?.type) {
+					case 'r0':
+						programState.r0 -= valueToMul;
+						if (programState.r0 > 255) {
+							programState.r0 %= 256;
+						}
+						break;
+					case 'r1':
+						programState.r1 -= valueToMul;
+						if (programState.r1 > 255) {
+							programState.r1 %= 256;
+						}
+						break;
+
+					default:
+						error(
+							new SyntaxError(SyntaxErrorType.InvalidDestination),
+							programState.instructionPointer,
+							`Cannot write to argument of type: ${statement.arg0?.type}`
+						);
+						break;
+				}
+				break;
+			case StatementTypes.Divide:
+				const valueToDiv = getArgumentValue(statement.arg1, programState.instructionPointer);
+				switch (statement.arg0?.type) {
+					case 'r0':
+						programState.r0 /= valueToDiv;
+						break;
+					case 'r1':
+						programState.r1 /= valueToDiv;
+						break;
+
+					default:
+						error(
+							new SyntaxError(SyntaxErrorType.InvalidDestination),
+							programState.instructionPointer,
+							`Cannot write to argument of type: ${statement.arg0?.type}`
+						);
+						break;
+				}
+				break;
+			case StatementTypes.Remainder:
+				const valueToRem = getArgumentValue(statement.arg1, programState.instructionPointer);
+				switch (statement.arg0?.type) {
+					case 'r0':
+						programState.r0 %= valueToRem;
+						break;
+					case 'r1':
+						programState.r1 %= valueToRem;
+						break;
+
+					default:
+						error(
+							new SyntaxError(SyntaxErrorType.InvalidDestination),
+							programState.instructionPointer,
+							`Cannot write to argument of type: ${statement.arg0?.type}`
+						);
+						break;
+				}
+				break;
+
+			default:
+				error(
+					new SyntaxError(SyntaxErrorType.InvalidStatement),
+					programState.instructionPointer,
+					'Invalid statement provided.'
+				);
+				break;
+		}
+
+		programState.instructionPointer += 1;
+	}
+
 	async function interpret() {
-		const statements = parse();
-		console.log(statements);
+		statements = parse();
+
+		programState.stopped = false;
 
 		while (programState.instructionPointer < statements.length) {
 			const statement = statements[programState.instructionPointer];
 
-			switch (statement.type) {
-				case StatementTypes.LoopStart:
-					if (!programState.loops.includes(programState.instructionPointer)) {
-						programState.loops.push(programState.instructionPointer);
-					}
-					break;
-
-				case StatementTypes.LoopEnd:
-					if (
-						programState.stack.length === 0 ||
-						programState.stack[programState.stack.length - 1] !== 0
-					) {
-						programState.instructionPointer = programState.loops[programState.loops.length - 1];
-					} else if (programState.stack[programState.stack.length - 1] === 0) {
-						programState.loops.pop();
-					}
-					break;
-
-				case StatementTypes.Copy:
-					const value = getArgumentValue(statement.arg0, programState.instructionPointer);
-					switch (statement.arg1?.type) {
-						case 'r0':
-							programState.r0 = value;
-							break;
-						case 'r1':
-							programState.r1 = value;
-							break;
-						case 'stack':
-							programState.stack.push(value);
-							break;
-						case 'stdout':
-							if (statement.arg1.type === 'stdout' && statement.arg1.asNumber === false) {
-								output += String.fromCharCode(value);
-							} else {
-								output += value.toString();
-							}
-							break;
-
-						default:
-							error(
-								new SyntaxError(SyntaxErrorType.InvalidDestination),
-								programState.instructionPointer,
-								`Cannot write to argument of type: ${statement.arg1?.type}`
-							);
-							break;
-					}
-					break;
-				case StatementTypes.Input:
-					const i: string = await new Promise((resolve) => {
-						resumeInterpreter = resolve;
-					});
-					programState.stack.push(0);
-					const inputArray = i.split('').reverse();
-					inputArray.forEach((v) => {
-						programState.stack.push(v.charCodeAt(0));
-					});
-					console.log($state.snapshot(programState.stack));
-					break;
-				case StatementTypes.Remove:
-					switch (statement.arg0?.type) {
-						case 'r0':
-							programState.r0 = 0;
-							break;
-						case 'r1':
-							programState.r1 = 0;
-							break;
-						case 'stack':
-							programState.stack.pop();
-							break;
-
-						default:
-							error(
-								new SyntaxError(SyntaxErrorType.InvalidDestination),
-								programState.instructionPointer,
-								`Cannot write to argument of type: ${statement.arg0?.type}`
-							);
-							break;
-					}
-					break;
-				case StatementTypes.Add:
-					const valueToAdd = getArgumentValue(statement.arg1, programState.instructionPointer);
-					switch (statement.arg0?.type) {
-						case 'r0':
-							programState.r0 += valueToAdd;
-							if (programState.r0 > 255) {
-								programState.r0 %= 256;
-							}
-							break;
-						case 'r1':
-							programState.r1 += valueToAdd;
-							if (programState.r1 > 255) {
-								programState.r1 %= 256;
-							}
-							break;
-
-						default:
-							error(
-								new SyntaxError(SyntaxErrorType.InvalidDestination),
-								programState.instructionPointer,
-								`Cannot write to argument of type: ${statement.arg0?.type}`
-							);
-							break;
-					}
-					break;
-				case StatementTypes.Subtract:
-					const valueToSub = getArgumentValue(statement.arg1, programState.instructionPointer);
-					switch (statement.arg0?.type) {
-						case 'r0':
-							programState.r0 -= valueToSub;
-							if (programState.r0 < 0) {
-								programState.r0 += 256;
-							}
-							break;
-						case 'r1':
-							programState.r1 -= valueToSub;
-							if (programState.r1 < 0) {
-								programState.r1 += 256;
-							}
-							break;
-
-						default:
-							error(
-								new SyntaxError(SyntaxErrorType.InvalidDestination),
-								programState.instructionPointer,
-								`Cannot write to argument of type: ${statement.arg0?.type}`
-							);
-							break;
-					}
-					break;
-				case StatementTypes.Multiply:
-					const valueToMul = getArgumentValue(statement.arg1, programState.instructionPointer);
-					switch (statement.arg0?.type) {
-						case 'r0':
-							programState.r0 -= valueToMul;
-							if (programState.r0 > 255) {
-								programState.r0 %= 256;
-							}
-							break;
-						case 'r1':
-							programState.r1 -= valueToMul;
-							if (programState.r1 > 255) {
-								programState.r1 %= 256;
-							}
-							break;
-
-						default:
-							error(
-								new SyntaxError(SyntaxErrorType.InvalidDestination),
-								programState.instructionPointer,
-								`Cannot write to argument of type: ${statement.arg0?.type}`
-							);
-							break;
-					}
-					break;
-				case StatementTypes.Divide:
-					const valueToDiv = getArgumentValue(statement.arg1, programState.instructionPointer);
-					switch (statement.arg0?.type) {
-						case 'r0':
-							programState.r0 /= valueToDiv;
-							break;
-						case 'r1':
-							programState.r1 /= valueToDiv;
-							break;
-
-						default:
-							error(
-								new SyntaxError(SyntaxErrorType.InvalidDestination),
-								programState.instructionPointer,
-								`Cannot write to argument of type: ${statement.arg0?.type}`
-							);
-							break;
-					}
-					break;
-				case StatementTypes.Remainder:
-					const valueToRem = getArgumentValue(statement.arg1, programState.instructionPointer);
-					switch (statement.arg0?.type) {
-						case 'r0':
-							programState.r0 %= valueToRem;
-							break;
-						case 'r1':
-							programState.r1 %= valueToRem;
-							break;
-
-						default:
-							error(
-								new SyntaxError(SyntaxErrorType.InvalidDestination),
-								programState.instructionPointer,
-								`Cannot write to argument of type: ${statement.arg0?.type}`
-							);
-							break;
-					}
-					break;
-
-				default:
-					error(
-						new SyntaxError(SyntaxErrorType.InvalidStatement),
-						programState.instructionPointer,
-						'Invalid statement provided.'
-					);
-					break;
-			}
-
-			programState.instructionPointer += 1;
+			await interpretStatement(statement);
 		}
 
 		programState.stopped = true;
+		programState.executionDone = true;
+		programState.instructionPointer = 0;
+	}
+
+	async function step() {
+		if (programState.instructionPointer === 0) {
+			statements = parse();
+		} else if (
+			programState.instructionPointer > statements.length ||
+			programState.executionDone ||
+			isWaitingInput
+		) {
+			return;
+		}
+
+		programState.stopped = false;
+
+		const statement = statements[programState.instructionPointer];
+
+		await interpretStatement(statement);
+
+		programState.stopped = true;
+
+		if (programState.instructionPointer >= statements.length) {
+			programState.executionDone = true;
+		}
 	}
 </script>
 
@@ -758,6 +792,10 @@ $ print F(0) and F(1) $
 			<div id="editor">
 				<CodeMirror
 					bind:value={code}
+					onchange={() => {
+						programState.instructionPointer = 0;
+						programState.executionDone = false;
+					}}
 					extensions={[
 						aglang,
 						baseStyle,
@@ -785,6 +823,12 @@ $ print F(0) and F(1) $
 						output = '';
 						input = '';
 					}}>reset</button
+				><button
+					class="action-btn"
+					disabled={programState.executionDone || code == '' || isWaitingInput}
+					onclick={() => {
+						step();
+					}}>step</button
 				>
 			</div>
 		</div>
@@ -855,11 +899,11 @@ $ print F(0) and F(1) $
 		cursor: pointer;
 		transition: 0.2s;
 
-		&:hover {
+		&:hover:not(:disabled) {
 			background-color: #757575;
 		}
 
-		&:active {
+		&:active:not(:disabled) {
 			background-color: #595959;
 		}
 	}
@@ -925,6 +969,10 @@ $ print F(0) and F(1) $
 					display: flex;
 					flex-direction: column;
 					gap: 1rem;
+
+					&:disabled {
+						background-color: #595959;
+					}
 				}
 			}
 
