@@ -809,6 +809,9 @@ $ print F(0) and F(1) $
 				<button
 					class="action-btn"
 					onclick={() => {
+						programState.r0 = 0;
+						programState.r1 = 0;
+						programState.stack = [];
 						programState.executionDone = false;
 						programState.instructionPointer = 0;
 						programState.stopped = false;
@@ -819,6 +822,9 @@ $ print F(0) and F(1) $
 				><button
 					class="action-btn"
 					onclick={() => {
+						programState.r0 = 0;
+						programState.r1 = 0;
+						programState.stack = [];
 						programState.executionDone = false;
 						programState.instructionPointer = 0;
 						programState.stopped = true;
