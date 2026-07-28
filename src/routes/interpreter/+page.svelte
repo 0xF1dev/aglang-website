@@ -769,6 +769,10 @@ $ print F(0) and F(1) $
 	}
 </script>
 
+<svelte:head>
+    <title>interpreter | aglang</title>
+</svelte:head>
+
 <div id="wrapper">
 	<div id="inner-wrapper">
 		<div id="top">

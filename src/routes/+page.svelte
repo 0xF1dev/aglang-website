@@ -2,6 +2,10 @@
 	import bg from '$lib/assets/bg.avif';
 </script>
 
+<svelte:head>
+    <title>home | aglang</title>
+</svelte:head>
+
 <div id="wrapper">
 	<div id="top">
 		<img src={bg} alt="" />

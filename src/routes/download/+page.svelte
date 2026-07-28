@@ -3,6 +3,10 @@
 	import windowsLogo from '$lib/assets/windows.webp';
 </script>
 
+<svelte:head>
+    <title>download | aglang</title>
+</svelte:head>
+
 <div id="wrapper">
 	<h1>download Aglang</h1>
 	<div id="btns">
