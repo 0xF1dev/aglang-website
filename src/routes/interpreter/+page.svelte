@@ -1047,6 +1047,8 @@ $ if the current number is less than the desired one (233), continue the loop by
 						programState.r0 = 0;
 						programState.r1 = 0;
 						programState.stack = [];
+						programState.loops = [];
+						programState.labels = [];
 						programState.executionDone = false;
 						programState.instructionPointer = 0;
 						programState.stopped = false;
@@ -1060,6 +1062,8 @@ $ if the current number is less than the desired one (233), continue the loop by
 						programState.r0 = 0;
 						programState.r1 = 0;
 						programState.stack = [];
+						programState.loops = [];
+						programState.labels = [];
 						programState.executionDone = false;
 						programState.instructionPointer = 0;
 						programState.stopped = true;
