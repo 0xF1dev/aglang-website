@@ -403,7 +403,7 @@ $ print F(0) and F(1) $
 			statementObj.arg0 = args[0];
 			statementObj.arg1 = args[1];
 		} else if (statement.includes('*')) {
-			if (args.length != 0) {
+			if (args.length != 2) {
 				error(
 					new SyntaxError(SyntaxErrorType.InvalidArguments),
 					index,
@@ -415,7 +415,7 @@ $ print F(0) and F(1) $
 			statementObj.arg0 = args[0];
 			statementObj.arg1 = args[1];
 		} else if (statement.includes('/')) {
-			if (args.length != 0) {
+			if (args.length != 2) {
 				error(
 					new SyntaxError(SyntaxErrorType.InvalidArguments),
 					index,
@@ -427,7 +427,7 @@ $ print F(0) and F(1) $
 			statementObj.arg0 = args[0];
 			statementObj.arg1 = args[1];
 		} else if (statement.includes('%')) {
-			if (args.length != 0) {
+			if (args.length != 2) {
 				error(
 					new SyntaxError(SyntaxErrorType.InvalidArguments),
 					index,
