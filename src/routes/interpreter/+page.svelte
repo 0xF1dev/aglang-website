@@ -162,18 +162,18 @@ $ print F(0) and F(1) $
 1>'';
 
 $ print F(0) and F(1) $
-'>\#;
-1010>\; $ newline $
-''>\#;
-1010>\; $ newline $
+'>\\#;
+1010>\\; $ newline $
+''>\\#;
+1010>\\; $ newline $
 
 ~.; $ define label $
 ''>:; $ put the current number in the stack $
 ''+'; $ sum current and previous number to the current number register $
 :>'; $ put the previous number (the old current number) in the previous number register $
 :!; $ pop it from the stack $
-''>\#; $ print the current number $
-1010>\; $ newline $
+''>\\#; $ print the current number $
+1010>\\; $ newline $
 
 $ if the current number is less than the desired one (233), continue the loop by going to label "." $
 ''?11101001;
