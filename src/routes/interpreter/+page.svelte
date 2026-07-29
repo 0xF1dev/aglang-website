@@ -331,7 +331,7 @@ $ print F(0) and F(1) $
 				error(
 					new SyntaxError(SyntaxErrorType.InvalidArguments),
 					index,
-					`${StatementTypes.LoopStart} requires 0 arguments, ${args.length} supplied`
+					`${StatementTypes[StatementTypes.LoopStart]} requires 0 arguments, ${args.length} supplied`
 				);
 				return statementObj;
 			}
@@ -341,7 +341,7 @@ $ print F(0) and F(1) $
 				error(
 					new SyntaxError(SyntaxErrorType.InvalidArguments),
 					index,
-					`${StatementTypes.LoopEnd} requires 0 arguments, ${args.length} supplied`
+					`${StatementTypes[StatementTypes.LoopEnd]} requires 0 arguments, ${args.length} supplied`
 				);
 				return statementObj;
 			}
@@ -351,7 +351,7 @@ $ print F(0) and F(1) $
 				error(
 					new SyntaxError(SyntaxErrorType.InvalidArguments),
 					index,
-					`${StatementTypes.Input} requires 0 arguments, ${args.length} supplied`
+					`${StatementTypes[StatementTypes.Input]} requires 0 arguments, ${args.length} supplied`
 				);
 				return statementObj;
 			}
@@ -361,7 +361,7 @@ $ print F(0) and F(1) $
 				error(
 					new SyntaxError(SyntaxErrorType.InvalidArguments),
 					index,
-					`${StatementTypes.Copy} requires 2 arguments, ${args.length} supplied`
+					`${StatementTypes[StatementTypes.Copy]} requires 2 arguments, ${args.length} supplied`
 				);
 				return statementObj;
 			}
@@ -373,7 +373,7 @@ $ print F(0) and F(1) $
 				error(
 					new SyntaxError(SyntaxErrorType.InvalidArguments),
 					index,
-					`${StatementTypes.Remove} requires 1 argument, ${args.length} supplied`
+					`${StatementTypes[StatementTypes.Remove]} requires 1 argument, ${args.length} supplied`
 				);
 				return statementObj;
 			}
@@ -384,7 +384,7 @@ $ print F(0) and F(1) $
 				error(
 					new SyntaxError(SyntaxErrorType.InvalidArguments),
 					index,
-					`${StatementTypes.Add} requires 2 arguments, ${args.length} supplied`
+					`${StatementTypes[StatementTypes.Add]} requires 2 arguments, ${args.length} supplied`
 				);
 				return statementObj;
 			}
@@ -396,7 +396,7 @@ $ print F(0) and F(1) $
 				error(
 					new SyntaxError(SyntaxErrorType.InvalidArguments),
 					index,
-					`${StatementTypes.Subtract} requires 2 arguments, ${args.length} supplied`
+					`${StatementTypes[StatementTypes.Subtract]} requires 2 arguments, ${args.length} supplied`
 				);
 				return statementObj;
 			}
@@ -408,7 +408,7 @@ $ print F(0) and F(1) $
 				error(
 					new SyntaxError(SyntaxErrorType.InvalidArguments),
 					index,
-					`${StatementTypes.Multiply} requires 2 arguments, ${args.length} supplied`
+					`${StatementTypes[StatementTypes.Multiply]} requires 2 arguments, ${args.length} supplied`
 				);
 				return statementObj;
 			}
@@ -420,7 +420,7 @@ $ print F(0) and F(1) $
 				error(
 					new SyntaxError(SyntaxErrorType.InvalidArguments),
 					index,
-					`${StatementTypes.Divide} requires 2 arguments, ${args.length} supplied`
+					`${StatementTypes[StatementTypes.Divide]} requires 2 arguments, ${args.length} supplied`
 				);
 				return statementObj;
 			}
@@ -432,7 +432,7 @@ $ print F(0) and F(1) $
 				error(
 					new SyntaxError(SyntaxErrorType.InvalidArguments),
 					index,
-					`${StatementTypes.Remainder} requires 2 arguments, ${args.length} supplied`
+					`${StatementTypes[StatementTypes.Remainder]} requires 2 arguments, ${args.length} supplied`
 				);
 				return statementObj;
 			}
