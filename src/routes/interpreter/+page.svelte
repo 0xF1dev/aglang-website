@@ -981,6 +981,8 @@ $ if the current number is less than the desired one (233), continue the loop by
 		programState.instructionPointer = 0;
 	}
 
+	let isPreviousCompare = false
+
 	async function step() {
 		if (programState.instructionPointer === 0) {
 			statements = parse();
@@ -996,7 +998,9 @@ $ if the current number is less than the desired one (233), continue the loop by
 
 		const statement = statements[programState.instructionPointer];
 
-		await interpretStatement(statement);
+		await interpretStatement(statement, isPreviousCompare);
+
+		isPreviousCompare = statement.type === StatementTypes.Compare;
 
 		programState.stopped = true;
 
