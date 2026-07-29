@@ -227,6 +227,7 @@ $ print F(0) and F(1) $
 	function error(error: Error, statementNumber: number, msg: string) {
 		output += `\n----------\nError ${error.message} on statement ${statementNumber + 1}: ${msg}\n----------\n`;
 		programState.stopped = true;
+		programState.executionDone = true;
 	}
 
 	const VALID_TOKENS = [
@@ -732,6 +733,10 @@ $ print F(0) and F(1) $
 		programState.stopped = false;
 
 		while (programState.instructionPointer < statements.length) {
+			if (programState.executionDone) {
+				break;
+			}
+
 			const statement = statements[programState.instructionPointer];
 
 			await interpretStatement(statement);
