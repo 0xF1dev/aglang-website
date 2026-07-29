@@ -986,6 +986,7 @@ $ if the current number is less than the desired one (233), continue the loop by
 	async function step() {
 		if (programState.instructionPointer === 0) {
 			statements = parse();
+			preprocess(statements);
 		} else if (
 			programState.instructionPointer > statements.length ||
 			programState.executionDone ||
