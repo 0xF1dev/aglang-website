@@ -123,7 +123,7 @@
 				return '';
 			case 'helloWorld':
 				return '1001000>\\ $ H $;\n1100101>\\ $ e $;\n1101100>\\ $ l $;\n1101100>\\ $ l $;\n1101111>\\ $ o $;\n101100>\\ $ , $;\n100000>\\ $ (space) $;\n1010111>\\ $ W $;\n1101111>\\ $ o $;\n1110010>\\ $ r $;\n1101100>\\ $ l $;\n1100100>\\ $ d $;\n100001>\\ $ ! $;\n1010>\\ $ (newline) $;\n';
-			case 'fibonacci':
+			case 'fibonacciLegacy':
 				return `$ this program prints fibonacci numbers up to 233 (the max for an unsigned 8bit integer) $
 $ the first part of this program puts 13 values in the stack to make the fibonacci loop run 13 times $
 $ there arent other ways to do this because of the 2 register limitation $
@@ -156,8 +156,29 @@ $ print F(0) and F(1) $
     1010>\\; $ newline $
     :!; $ pop one of the counter 1's from the stack $
 ]
+`;
+			case 'fibonacci':
+				return `0>';
+1>'';
 
-				`;
+$ print F(0) and F(1) $
+'>\#;
+1010>\; $ newline $
+''>\#;
+1010>\; $ newline $
+
+~.; $ define label $
+''>:; $ put the current number in the stack $
+''+'; $ sum current and previous number to the current number register $
+:>'; $ put the previous number (the old current number) in the previous number register $
+:!; $ pop it from the stack $
+''>\#; $ print the current number $
+1010>\; $ newline $
+
+$ if the current number is less than the desired one (233), continue the loop by going to label "." $
+''?11101001;
+<.;
+`
 			case 'mirror':
 				return `$ this program reprints whatever the user writes $
 
@@ -1013,6 +1034,7 @@ $ print F(0) and F(1) $
 					<option value="default" disabled selected>select an example</option>
 					<option value="helloWorld">hello world</option>
 					<option value="fibonacci">fibonacci</option>
+					<option value="fibonacciLegacy">fibonacci (legacy)</option>
 					<option value="mirror">mirror</option>
 				</select>
 				<button
