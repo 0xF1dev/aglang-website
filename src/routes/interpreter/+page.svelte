@@ -44,11 +44,11 @@
 
 			if (ch === '0' || ch === '1') return 'literal';
 
-			if (['+', '-', '*', '/', '%', '>', '!', '|'].includes(ch || '')) return 'operator';
+			if (['+', '-', '*', '/', '%', '>', '!', '|', '?', '^', '<', '=', '~'].includes(ch || '')) return 'operator';
 
 			if (ch === '"' || ch === "'" || ch === ':') return 'variableName';
 
-			if (ch === '\\') return 'labelName';
+			if (ch === '\\' || ch === '.') return 'labelName';
 
 			if (ch === ';') return 'separator';
 
@@ -109,8 +109,10 @@
 		r1: 0,
 		instructionPointer: 0,
 		loops: [] as number[],
+		labels: [] as { index: number; instruction: number }[],
 		stopped: true,
-		executionDone: false
+		executionDone: false,
+		currentCompare: null as CompareState | null
 	});
 
 	let example = $state('default');
@@ -248,8 +250,20 @@ $ print F(0) and F(1) $
 		'-',
 		'*',
 		'/',
-		'%'
+		'%',
+		'~',
+		'.',
+		'?',
+		'^',
+		'<',
+		'='
 	];
+
+	enum CompareState {
+		Greater,
+		Less,
+		Equal
+	}
 
 	enum StatementTypes {
 		Input,
@@ -261,7 +275,12 @@ $ print F(0) and F(1) $
 		Divide,
 		Remainder,
 		LoopStart,
-		LoopEnd
+		LoopEnd,
+		Label,
+		Compare,
+		Greater,
+		Less,
+		Equal
 	}
 
 	type Argument =
@@ -270,6 +289,7 @@ $ print F(0) and F(1) $
 		| { type: 'r1' }
 		| { type: 'stack' }
 		| { type: 'stdout'; asNumber: boolean }
+		| { type: 'label'; index: number }
 		| null;
 
 	interface Statement {
@@ -307,7 +327,7 @@ $ print F(0) and F(1) $
 	function parseStatement(statement: string, index: number): Statement {
 		let statementObj: Statement = { type: null, arg0: null, arg1: null };
 
-		let rawArgs = statement.split(/[|>\!+\-*/%\[\]]/).filter((s) => s.length > 0);
+		let rawArgs = statement.split(/[|>\!+\-*/%\[\]~?^<=]/).filter((s) => s.length > 0);
 
 		if (rawArgs.length > 2) {
 			error(
@@ -439,6 +459,63 @@ $ print F(0) and F(1) $
 			statementObj.type = StatementTypes.Remainder;
 			statementObj.arg0 = args[0];
 			statementObj.arg1 = args[1];
+		} else if (statement.includes('?')) {
+			if (args.length != 2) {
+				console.log('aaaaa');
+				error(
+					new SyntaxError(SyntaxErrorType.InvalidArguments),
+					index,
+					`${StatementTypes[StatementTypes.Compare]} requires 2 arguments, ${args.length} supplied`
+				);
+				return statementObj;
+			}
+			statementObj.type = StatementTypes.Compare;
+			statementObj.arg0 = args[0];
+			statementObj.arg1 = args[1];
+		} else if (statement.includes('^')) {
+			if (args.length != 1) {
+				error(
+					new SyntaxError(SyntaxErrorType.InvalidArguments),
+					index,
+					`${StatementTypes[StatementTypes.Greater]} requires 1 argument, ${args.length} supplied`
+				);
+				return statementObj;
+			}
+			statementObj.type = StatementTypes.Compare;
+			statementObj.arg1 = args[0];
+		} else if (statement.includes('<')) {
+			if (args.length != 1) {
+				error(
+					new SyntaxError(SyntaxErrorType.InvalidArguments),
+					index,
+					`${StatementTypes[StatementTypes.Less]} requires 1 argument, ${args.length} supplied`
+				);
+				return statementObj;
+			}
+			statementObj.type = StatementTypes.Less;
+			statementObj.arg1 = args[0];
+		} else if (statement.includes('=')) {
+			if (args.length != 1) {
+				error(
+					new SyntaxError(SyntaxErrorType.InvalidArguments),
+					index,
+					`${StatementTypes[StatementTypes.Equal]} requires 1 argument, ${args.length} supplied`
+				);
+				return statementObj;
+			}
+			statementObj.type = StatementTypes.Equal;
+			statementObj.arg1 = args[0];
+		} else if (statement.includes('~')) {
+			if (args.length != 1) {
+				error(
+					new SyntaxError(SyntaxErrorType.InvalidArguments),
+					index,
+					`${StatementTypes[StatementTypes.Label]} requires 1 argument, ${args.length} supplied`
+				);
+				return statementObj;
+			}
+			statementObj.type = StatementTypes.Label;
+			statementObj.arg1 = args[0];
 		}
 
 		return statementObj;
@@ -477,6 +554,8 @@ $ print F(0) and F(1) $
 					} else {
 						return { type: 'literal', value: val };
 					}
+				} else if (/^.+$/.test(arg)) {
+					return { type: 'label', index: arg.length };
 				} else {
 					return null;
 				}
@@ -520,7 +599,20 @@ $ print F(0) and F(1) $
 		}
 	}
 
-	async function interpretStatement(statement: Statement) {
+	async function interpretStatement(statement: Statement, isPreviousCompare: boolean) {
+		if (
+			(statement.type === StatementTypes.Greater ||
+				statement.type === StatementTypes.Less ||
+				statement.type === StatementTypes.Equal) &&
+			!isPreviousCompare
+		) {
+			error(
+				new SyntaxError(SyntaxErrorType.InvalidStatement),
+				programState.instructionPointer,
+				`Statement ${StatementTypes[statement.type]} has to be preceded by a ${StatementTypes[StatementTypes.Compare]} statement`
+			);
+		}
+
 		switch (statement.type) {
 			case StatementTypes.LoopStart:
 				if (!programState.loops.includes(programState.instructionPointer)) {
@@ -538,6 +630,102 @@ $ print F(0) and F(1) $
 					programState.loops.pop();
 				}
 				break;
+
+			case StatementTypes.Label:
+				break;
+
+			case StatementTypes.Compare:
+				const firstValue = getArgumentValue(statement.arg0, programState.instructionPointer);
+				const secondValue = getArgumentValue(statement.arg1, programState.instructionPointer);
+				if (firstValue == secondValue) {
+					programState.currentCompare = CompareState.Equal;
+				} else if (firstValue > secondValue) {
+					programState.currentCompare = CompareState.Greater;
+				} else if (firstValue < secondValue) {
+					programState.currentCompare = CompareState.Less;
+				}
+				break;
+
+			case StatementTypes.Greater: {
+				let labelIndex: number;
+				if (statement.arg1?.type === 'label') {
+					labelIndex = statement.arg1.index;
+				} else {
+					error(
+						new SyntaxError(SyntaxErrorType.InvalidArguments),
+						programState.instructionPointer,
+						`Cannot use argument ${statement.arg0?.type} as label reference.`
+					);
+					break;
+				}
+				let label = programState.labels.find((l) => l.index == labelIndex);
+				if (label === undefined) {
+					error(
+						new SyntaxError(SyntaxErrorType.InvalidArguments),
+						programState.instructionPointer,
+						`Label ${'.'.repeat(labelIndex)} isn't defined.`
+					);
+					break;
+				}
+				if (programState.currentCompare === CompareState.Greater) {
+					programState.instructionPointer = label.instruction;
+				}
+				break;
+			}
+
+			case StatementTypes.Less: {
+				let labelIndex: number;
+				if (statement.arg1?.type === 'label') {
+					labelIndex = statement.arg1.index;
+				} else {
+					error(
+						new SyntaxError(SyntaxErrorType.InvalidArguments),
+						programState.instructionPointer,
+						`Cannot use argument ${statement.arg0?.type} as label reference.`
+					);
+					break;
+				}
+				let label = programState.labels.find((l) => l.index == labelIndex);
+				if (label === undefined) {
+					error(
+						new SyntaxError(SyntaxErrorType.InvalidArguments),
+						programState.instructionPointer,
+						`Label ${'.'.repeat(labelIndex)} isn't defined.`
+					);
+					break;
+				}
+				if (programState.currentCompare === CompareState.Less) {
+					programState.instructionPointer = label.instruction;
+				}
+				break;
+			}
+
+			case StatementTypes.Equal: {
+				let labelIndex: number;
+				if (statement.arg1?.type === 'label') {
+					labelIndex = statement.arg1.index;
+				} else {
+					error(
+						new SyntaxError(SyntaxErrorType.InvalidArguments),
+						programState.instructionPointer,
+						`Cannot use argument ${statement.arg0?.type} as label reference.`
+					);
+					break;
+				}
+				let label = programState.labels.find((l) => l.index == labelIndex);
+				if (label === undefined) {
+					error(
+						new SyntaxError(SyntaxErrorType.InvalidArguments),
+						programState.instructionPointer,
+						`Label ${'.'.repeat(labelIndex)} isn't defined.`
+					);
+					break;
+				}
+				if (programState.currentCompare === CompareState.Equal) {
+					programState.instructionPointer = label.instruction;
+				}
+				break;
+			}
 
 			case StatementTypes.Copy:
 				const value = getArgumentValue(statement.arg0, programState.instructionPointer);
@@ -727,10 +915,33 @@ $ print F(0) and F(1) $
 		programState.instructionPointer += 1;
 	}
 
+	function preprocess(statements: Statement[]) {
+		statements.forEach((statement, i) => {
+			if (statement.type == StatementTypes.Label) {
+				let labelIndex: number;
+				if (statement.arg1?.type === 'label') {
+					labelIndex = statement.arg1.index;
+				} else {
+					error(
+						new SyntaxError(SyntaxErrorType.InvalidArguments),
+						i,
+						`Cannot use argument of type ${statement.arg1?.type} as label definition.`
+					);
+					return;
+				}
+				programState.labels.push({ index: labelIndex, instruction: i });
+			}
+		});
+	}
+
 	async function interpret() {
 		statements = parse();
 
+		preprocess(statements);
+
 		programState.stopped = false;
+
+		let isPreviousCompare = false;
 
 		while (programState.instructionPointer < statements.length) {
 			if (programState.executionDone) {
@@ -739,7 +950,9 @@ $ print F(0) and F(1) $
 
 			const statement = statements[programState.instructionPointer];
 
-			await interpretStatement(statement);
+			await interpretStatement(statement, isPreviousCompare);
+
+			isPreviousCompare = statement.type === StatementTypes.Compare;
 		}
 
 		programState.stopped = true;
@@ -773,7 +986,7 @@ $ print F(0) and F(1) $
 </script>
 
 <svelte:head>
-    <title>interpreter | aglang</title>
+	<title>interpreter | aglang</title>
 </svelte:head>
 
 <div id="wrapper">
