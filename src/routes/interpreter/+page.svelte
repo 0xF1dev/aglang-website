@@ -8,8 +8,6 @@
 	import { closeBracketsKeymap } from '@codemirror/autocomplete';
 	import { EditorState } from '@codemirror/state';
 
-	import logoSmall from '$lib/assets/aglanglogo-small.avif';
-
 	const aglang = StreamLanguage.define({
 		startState() {
 			return { inComment: false };
