@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-    <title>home | aglang</title>
+	<title>home | aglang</title>
 </svelte:head>
 
 <div id="wrapper">
@@ -91,7 +91,8 @@ $ print F(0) and F(1) $
 				the maximum that 8-bit integers can fit) and is a great example of how things have to be
 				made in Aglang. in Aglang, you only have <strong>two registers</strong>, and they have to be
 				used to keep track of the fibonacci numbers, so to make a counter, you have to use values in
-				the stack followed by a zero to make the loop stop at the correct iteration.
+				the stack followed by a zero to make the loop stop at the correct iteration. (aglang now
+				supports labels, so this example is considered obsolete, but still good)
 			</p>
 		</div>
 		<div class="section">
@@ -187,7 +188,8 @@ $ print F(0) and F(1) $
 			#example-2 {
 				display: flex;
 				justify-content: center;
-				max-width: 60%;
+				width: fit-content;
+				max-width: 80%;
 				gap: 2rem;
 				margin: 1rem 0;
 
@@ -195,12 +197,12 @@ $ print F(0) and F(1) $
 					background-color: #212121;
 					padding: 0 1rem;
 					border-radius: 8px;
-					width: 50%;
+					min-width: 50%;
 				}
 
 				p {
 					text-align: end;
-					width: 50%;
+					max-width: 50%;
 				}
 			}
 
