@@ -1198,6 +1198,10 @@ $ if the current number is less than the desired one (233), continue the loop by
 		&:active:not(:disabled) {
 			background-color: #595959;
 		}
+		
+		&:disabled {
+			color: black;
+		}
 	}
 
 	#wrapper {
