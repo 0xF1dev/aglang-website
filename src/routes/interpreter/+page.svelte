@@ -196,9 +196,7 @@ $ if the current number is less than the desired one (233), continue the loop by
 		}
 	});
 	const param = page.url.searchParams.get('code') || '';
-	console.log(param);
 	const bytes = Uint8Array.from(atob(param), (c) => c.charCodeAt(0));
-	console.log(bytes);
 	code = new TextDecoder().decode(bytes);
 	let output = $state('');
 	let input = $state('');
