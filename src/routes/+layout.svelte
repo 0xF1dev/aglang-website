@@ -22,7 +22,7 @@
 		<a href="https://github.com/0xF1dev/aglang/blob/main/docs/reference.md">docs</a>
 	</div>
 </div>
-{@render children()}
+<main>{@render children()}</main>
 
 <style lang="scss">
 	@font-face {
@@ -36,6 +36,9 @@
 		color: #fff;
 		margin: 0;
 		font-family: 'Tabular';
+		display: flex;
+		flex-direction: column;
+		height: 100vh;
 	}
 
 	#header {
@@ -81,5 +84,9 @@
 				text-decoration: underline;
 			}
 		}
+	}
+
+	main {
+		flex-grow: 1;
 	}
 </style>
