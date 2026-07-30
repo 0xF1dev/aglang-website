@@ -7,6 +7,7 @@
 	import { tick } from 'svelte';
 	import { closeBracketsKeymap } from '@codemirror/autocomplete';
 	import { EditorState } from '@codemirror/state';
+	import { page } from '$app/state';
 
 	const aglang = StreamLanguage.define({
 		startState() {
@@ -44,7 +45,8 @@
 
 			if (ch === '0' || ch === '1') return 'literal';
 
-			if (['+', '-', '*', '/', '%', '>', '!', '|', '?', '^', '<', '=', '~'].includes(ch || '')) return 'operator';
+			if (['+', '-', '*', '/', '%', '>', '!', '|', '?', '^', '<', '=', '~'].includes(ch || ''))
+				return 'operator';
 
 			if (ch === '"' || ch === "'" || ch === ':') return 'variableName';
 
@@ -178,7 +180,7 @@ $ print F(0) and F(1) $
 $ if the current number is less than the desired one (233), continue the loop by going to label "." $
 ''?11101001;
 <.;
-`
+`;
 			case 'mirror':
 				return `$ this program reprints whatever the user writes $
 
@@ -193,6 +195,11 @@ $ if the current number is less than the desired one (233), continue the loop by
 				return '';
 		}
 	});
+	const param = page.url.searchParams.get('code') || '';
+	console.log(param);
+	const bytes = Uint8Array.from(atob(param), (c) => c.charCodeAt(0));
+	console.log(bytes);
+	code = new TextDecoder().decode(bytes);
 	let output = $state('');
 	let input = $state('');
 
@@ -981,7 +988,7 @@ $ if the current number is less than the desired one (233), continue the loop by
 		programState.instructionPointer = 0;
 	}
 
-	let isPreviousCompare = false
+	let isPreviousCompare = false;
 
 	async function step() {
 		if (programState.instructionPointer === 0) {
@@ -1104,6 +1111,19 @@ $ if the current number is less than the desired one (233), continue the loop by
 						</tr>
 					</tbody>
 				</table>
+				<button
+					class="action-btn"
+					onclick={async (e) => {
+						const btn = e.currentTarget;
+						await navigator.clipboard.writeText(
+							page.url.origin + '/interpreter?code=' + encodeURIComponent(btoa(code))
+						);
+						btn.innerText = 'url copied!';
+						setTimeout(() => {
+							btn.innerText = 'share';
+						}, 1500);
+					}}>share</button
+				>
 			</div>
 		</div>
 		<div id="io">
@@ -1224,6 +1244,10 @@ $ if the current number is less than the desired one (233), continue the loop by
 
 					.action-btn:disabled {
 						background-color: #595959;
+					}
+
+					.action-btn:last-of-type {
+						margin-top: auto;
 					}
 
 					table {
