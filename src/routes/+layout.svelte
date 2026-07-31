@@ -19,6 +19,7 @@
 	<div id="links">
 		<a href="/download">download</a>
 		<a href="/interpreter">try it</a>
+		<a href="/learn">learn</a>
 		<a href="https://github.com/0xF1dev/aglang/blob/main/docs/reference.md">docs</a>
 	</div>
 </div>

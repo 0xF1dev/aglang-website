@@ -1,0 +1,6 @@
+{
+    "objective": "Print an operation with a result of 10",
+    "expectedOutput": ["10"],
+    "code": "$ write your code here $\n\n",
+    "canContinue": true
+}

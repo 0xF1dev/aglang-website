@@ -1,0 +1,6 @@
+{
+    "objective": "Reprint the first letter from the user's input",
+    "expectedOutput": ["a\na"],
+    "code": "",
+    "canContinue": true
+}

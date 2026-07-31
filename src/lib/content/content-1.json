@@ -1,0 +1,6 @@
+{
+    "objective": "Get started with Aglang",
+    "expectedOutput": ["Hello, user!"],
+    "code": "1001000>\\; $ H $\n1100101>\\; $ e $\n1101100>\\; $ l $\n1101100>\\; $ l $\n1101111>\\; $ o $\n101100>\\; $ , $\n100000>\\; $ (space) $\n1110101>\\; $ u $\n1110011>\\; $ s $\n1100101>\\; $ e $\n1110010>\\; $ r $\n100001>\\; $ ! $\n",
+    "canContinue": true
+}

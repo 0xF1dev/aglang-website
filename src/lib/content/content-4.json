@@ -1,0 +1,6 @@
+{
+    "objective": "Print \"W\" to the output",
+    "expectedOutput": ["W"],
+    "code": "01000101>';\n10010>'';\n'+''; $ sum the two registers and save the result in register 0 $\n$ missing line... $\n:>\\;",
+    "canContinue": true
+}

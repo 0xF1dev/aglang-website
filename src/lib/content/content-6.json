@@ -1,0 +1,6 @@
+{
+    "objective": "Print the second value in the stack",
+    "expectedOutput": ["!"],
+    "code": "0100001>:;\n0101110>:;\n$ write code below $\n\n",
+    "canContinue": true
+}

@@ -1,0 +1,6 @@
+{
+    "objective": "Print \"A\" to the output",
+    "expectedOutput": ["A"],
+    "code": "$ insert value here $>\\;\n",
+    "canContinue": true
+}

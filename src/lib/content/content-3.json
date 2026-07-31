@@ -1,0 +1,6 @@
+{
+    "objective": "Run the program",
+    "expectedOutput": ["2\n1"],
+    "code": "1>'; $ copies 1 into register 0 $\n'+1;\n'>\\#; $ prints the output as a number $;1010>\\; $ newline $\n0011>''; $ copies 3 into register 1 $\n''-0010;\n''>\\#;\n",
+    "canContinue": true
+}

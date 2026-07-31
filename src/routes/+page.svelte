@@ -14,6 +14,7 @@
 		<div id="btn-wrapper">
 			<a href="/download" class="landing-button">download</a>
 			<a href="/interpreter" class="landing-button">try it</a>
+			<a href="/learn" class="landing-button">learn</a>
 		</div>
 	</div>
 	<div id="content">

@@ -1,0 +1,6 @@
+{
+    "objective": "Mirror the user input \"abc\"",
+    "expectedOutput": ["abc\nabc"],
+    "code": "|;\n\n$ write the loop below $\n",
+    "canContinue": true
+}
