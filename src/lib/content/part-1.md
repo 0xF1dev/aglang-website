@@ -4,6 +4,8 @@ Aglang is an [esoteric language](https://en.wikipedia.org/wiki/Esoteric_programm
 
 This interactive, 10-part course will guide you through all Aglang, and by the end of it you'll hopefully be able to write your own programs in Aglang.
 
+If you prefer a more theoretical guide, check out the <a href="https://github.com/0xF1dev/aglang/blob/main/docs/reference.md">language reference</a>, but I recommend this guide, personally :)
+
 ---
 
 In a lesson, you'll have:
