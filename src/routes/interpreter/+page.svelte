@@ -1190,6 +1190,7 @@ $ if the current number is less than the desired one (233), continue the loop by
 		font-family: 'Tabular';
 		cursor: pointer;
 		transition: 0.2s;
+		background-color: white;
 
 		&:hover:not(:disabled) {
 			background-color: #757575;

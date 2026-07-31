@@ -1160,6 +1160,7 @@
 		font-family: 'Tabular';
 		cursor: pointer;
 		transition: 0.2s;
+		background-color: white;
 
 		&:hover:not(:disabled) {
 			background-color: #757575;
