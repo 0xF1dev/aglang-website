@@ -104,6 +104,11 @@ $ print F(0) and F(1) $
 				interpreter and a compiler (currently the compiler only supports linux; windows support
 				coming soon.)
 			</p>
+			<p>
+				if you want to learn it, you can try the <a href="/learn">interactive tutorial</a>, or if
+				you like a more theoretical approach, check out the
+				<a href="https://github.com/0xF1dev/aglang/blob/main/docs/reference.md">docs</a>
+			</p>
 		</div>
 	</div>
 </div>
