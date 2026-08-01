@@ -101,8 +101,7 @@ $ print F(0) and F(1) $
 			<p>
 				Aglang can be tried online in the <a href="/interpreter">web interpreter</a>, or, if you
 				want to install it, you can use the <a href="/download">cli</a>: the cli includes an
-				interpreter and a compiler (currently the compiler only supports linux; windows support
-				coming soon.)
+				interpreter, a transpiler and a compiler.
 			</p>
 			<p>
 				if you want to learn it, you can try the <a href="/learn">interactive tutorial</a>, or if
